@@ -28,8 +28,8 @@ jobs:
       run: |
         rm -rf TMessagesProj_AppStandalone/build .gradle build
         echo "sdk.dir=$ANDROID_HOME" > local.properties
-        echo "APP_ID=94575" >> gradle.properties
-        echo "APP_HASH=a3406de8d171326e3c403d80a9b00a9c" >> gradle.properties
+        echo "APP_ID=30357243" >> gradle.properties
+        echo "APP_HASH=9782c26101c502f026721b8e7993786c" >> gradle.properties
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
