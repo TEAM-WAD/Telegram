@@ -1,0 +1,77 @@
+name: Build Telegram APK
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code with Submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Clean Build Folders & Inject Permissions
+      run: |
+        echo "=== حذف المجلدات القديمة وإنشاء مجلدات نظيفة تلقائياً ==="
+        rm -rf TMessagesProj/build
+        rm -rf .gradle
+        rm -rf build
+        mkdir -p TMessagesProj/build
+        
+        echo "=== حقن وتأكيد جميع الصلاحيات الأساسية (إنترنت، شبكة، تخزين، كاميرا...) تلقائياً ==="
+        MANIFEST_PATH="TMessagesProj/src/main/AndroidManifest.xml"
+        if [ -f "$MANIFEST_PATH" ]; then
+          python3 -c "
+          import xml.etree.ElementTree as ET
+          ET.register_namespace('android', 'http://schemas.android.com/apk/res/android')
+          tree = ET.parse('$MANIFEST_PATH')
+          root = tree.getroot()
+          
+          permissions = [
+              'android.permission.INTERNET',
+              'android.permission.ACCESS_NETWORK_STATE',
+              'android.permission.WRITE_EXTERNAL_STORAGE',
+              'android.permission.READ_EXTERNAL_STORAGE',
+              'android.permission.CAMERA',
+              'android.permission.RECORD_AUDIO',
+              'android.permission.ACCESS_WIFI_STATE',
+              'android.permission.WAKE_LOCK',
+              'android.permission.VIBRATE'
+          ]
+          
+          existing = {elem.attrib.get('{http://schemas.android.com/apk/res/android}name') for elem in root.findall('uses-permission')}
+          
+          for perm in permissions:
+              if perm not in existing:
+                  new_perm = ET.Element('uses-permission', {'{http://schemas.android.com/apk/res/android}name': perm})
+                  root.append(new_perm)
+                  print(f'تم حقن الصلاحية بنجاح: {perm}')
+                  
+          tree.write('$MANIFEST_PATH', encoding='utf-8', xml_declaration=True)
+          "
+        else:
+          echo "لم يتم العثور على ملف AndroidManifest.xml!"
+        fi
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build Telegram APK
+      run: ./gradlew assembleAfatDebug --stacktrace
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Telegram-Custom-Injected-APK
+        path: TMessagesProj/build/outputs/apk/**/*.apk
