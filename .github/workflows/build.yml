@@ -26,7 +26,7 @@ jobs:
 
     - name: Setup Build Configuration
       run: |
-        rm -rf TMessagesProj/build .gradle build
+        rm -rf TMessagesProj_AppStandalone/build .gradle build
         echo "sdk.dir=$ANDROID_HOME" > local.properties
         echo "APP_ID=94575" >> gradle.properties
         echo "APP_HASH=a3406de8d171326e3c403d80a9b00a9c" >> gradle.properties
@@ -41,4 +41,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Telegram-Custom-APK
-        path: TMessagesProj/build/outputs/apk/**/*.apk
+        path: TMessagesProj_AppStandalone/build/outputs/apk/**/*.apk
