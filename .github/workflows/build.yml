@@ -1,15 +1,18 @@
-name: Build Telegram Android
+name: Build Extera Telegram APK
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    name: Build AFAT Release APK
+    name: Build Extera Release APK
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -18,71 +21,76 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
           cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Android SDK
+      - name: Install Android SDK / NDK
+        shell: bash
         run: |
           yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager             "platform-tools"             "platforms;android-35"             "build-tools;35.0.0"             "build-tools;30.0.3"             "ndk;21.4.7075529"
 
-          sdkmanager \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0" \
-            "build-tools;30.0.3" \
-            "ndk;21.4.7075529"
+      - name: Verify Extera files
+        shell: bash
+        run: |
+          set -e
 
-      - name: Prepare project API configuration
+          required_files=(
+            "TMessagesProj/src/main/java/org/telegram/messenger/ExteraFeatures.java"
+            "TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java"
+            "TMessagesProj/src/main/java/org/telegram/messenger/MessagesController.java"
+            "TMessagesProj/src/main/java/org/telegram/ui/ChatActivity.java"
+            "TMessagesProj/src/main/java/org/telegram/ui/Cells/ChatMessageCell.java"
+            "TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java"
+          )
+
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "::error::Missing required file: $file"
+              exit 1
+            fi
+            echo "OK: $file"
+          done
+
+      - name: Prepare API configuration
+        shell: bash
         run: |
           cat > API_KEYS <<'EOF'
           APP_ID=30357243
           APP_HASH=9782c26101c502f026721b8e7993786c
           EOF
 
-      - name: Verify project
-        run: |
-          test -f gradlew
-          test -d TMessagesProj
-          test -d TMessagesProj_App
-
-          echo "Project structure:"
-          ls -la
-
       - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Build Extera AFAT release APK
+        shell: bash
         run: |
-          chmod +x ./gradlew
+          ./gradlew :TMessagesProj_App:assembleAfatRelease             --no-daemon             --stacktrace
 
-      - name: Show Gradle version
+      - name: Collect APK
+        shell: bash
         run: |
-          ./gradlew --version
+          set -e
+          mkdir -p Extera-APK
 
-      - name: Build AFAT Release APK
-        run: |
-          ./gradlew :TMessagesProj_App:assembleAfatRelease \
-            --no-daemon \
-            --stacktrace
+          find TMessagesProj_App/build/outputs/apk TMessagesProj/build/outputs/apk             -type f -name "*.apk" -exec cp {} Extera-APK/ \; 2>/dev/null || true
 
-      - name: Locate APK
-        if: always()
-        run: |
-          echo "===== APK FILES ====="
+          if ! find Extera-APK -type f -name "*.apk" -print -quit | grep -q .; then
+            echo "::error::No APK was produced."
+            exit 1
+          fi
 
-          find TMessagesProj_App \
-            -type f \
-            -name "*.apk" \
-            -print || true
+          echo "===== GENERATED APK ====="
+          find Extera-APK -type f -name "*.apk" -print
 
-          echo "====================="
-
-      - name: Upload APK
-        if: success()
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Telegram-Android-AFAT
-          path: |
-            TMessagesProj_App/build/outputs/apk/**/*.apk
-            TMessagesProj/build/outputs/apk/**/*.apk
+          name: Extera-Telegram-APK
+          path: Extera-APK/*.apk
           if-no-files-found: error
+          retention-days: 7
