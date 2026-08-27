@@ -65,6 +65,7 @@ import com.google.common.collect.Lists;
 
 import org.telegram.PhoneFormat.PhoneFormat;
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ExteraFeatures;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.AuthTokensHelper;
 import org.telegram.messenger.BirthdayController;
@@ -736,6 +737,11 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         if (items.get(items.size() - 1).viewType != UniversalAdapter.VIEW_TYPE_SHADOW)
             items.add(UItem.asShadow(null));
 
+        items.add(UItem.asHeader("ميزات إضافية"));
+        items.add(UItem.asSwitchNoIcon(24, "وضع الشبح").setChecked(ExteraFeatures.isGhostModeEnabled(currentAccount)));
+        items.add(UItem.asSwitchNoIcon(25, "الاحتفاظ بالرسائل المحذوفة من الطرف الآخر").setChecked(ExteraFeatures.isAntiDeleteEnabled(currentAccount)));
+        items.add(UItem.asShadow(null));
+
         items.add(UItem.asHeader(getString(R.string.SettingsHelp)));
         items.add(SettingCell.Factory.of(17, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_ask, getString(R.string.AskAQuestion)));
         items.add(SettingCell.Factory.of(18, IconBackgroundColors.BLUE_LIGHT.top, IconBackgroundColors.BLUE_LIGHT.bottom, R.drawable.settings_faq, getString(R.string.TelegramFAQ)));
@@ -853,6 +859,20 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 UserSelectorBottomSheet.open(0, BirthdayController.getInstance(UserConfig.selectedAccount).getState());
                 break;
 
+            case 24: {
+                boolean enabled = !ExteraFeatures.isGhostModeEnabled(currentAccount);
+                ExteraFeatures.setGhostModeEnabled(currentAccount, enabled);
+                item.setChecked(enabled);
+                listView.adapter.update(true);
+                break;
+            }
+            case 25: {
+                boolean enabled = !ExteraFeatures.isAntiDeleteEnabled(currentAccount);
+                ExteraFeatures.setAntiDeleteEnabled(currentAccount, enabled);
+                item.setChecked(enabled);
+                listView.adapter.update(true);
+                break;
+            }
             case 17:
                 showDialog(AlertsCreator.createSupportAlert(this, resourceProvider));
                 break;
