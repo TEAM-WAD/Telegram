@@ -142,6 +142,7 @@ import org.telegram.messenger.ContactsController;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.DocumentObject;
 import org.telegram.messenger.Emoji;
+import org.telegram.messenger.ExteraFeatures;
 import org.telegram.messenger.FileLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.FlagSecureReason;
