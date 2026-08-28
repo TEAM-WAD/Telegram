@@ -1273,6 +1273,9 @@ public class StoriesController {
     }
 
     public boolean markStoryAsRead(long dialogId, TL_stories.StoryItem storyItem) {
+        if (ExteraFeatures.isGhostStoriesEnabled(currentAccount)) {
+            return false;
+        }
         TL_stories.PeerStories userStories = getStories(dialogId);
         if (userStories == null) {
             userStories = getStoriesFromFullPeer(dialogId);
@@ -1281,6 +1284,9 @@ public class StoriesController {
     }
 
     public boolean markStoryAsRead(TL_stories.PeerStories userStories, TL_stories.StoryItem storyItem, boolean profile) {
+        if (ExteraFeatures.isGhostStoriesEnabled(currentAccount)) {
+            return false;
+        }
         if (storyItem == null || userStories == null) {
             return false;
         }
