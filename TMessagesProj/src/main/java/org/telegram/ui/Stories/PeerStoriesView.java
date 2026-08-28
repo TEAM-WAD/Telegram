@@ -70,6 +70,7 @@ import androidx.core.math.MathUtils;
 import org.telegram.ui.recyclerview.ChatListItemAnimator;
 
 import org.telegram.messenger.AccountInstance;
+import org.telegram.messenger.ExteraFeatures;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
