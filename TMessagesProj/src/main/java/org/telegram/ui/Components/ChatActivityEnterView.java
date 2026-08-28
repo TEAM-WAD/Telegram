@@ -4754,7 +4754,7 @@ public class ChatActivityEnterView extends FrameLayout implements
         CharSequence[] choices = new CharSequence[]{"دقيقة", "3 دقائق", "4 دقائق", "5 دقائق", "10 دقائق", "ساعة", "إيقاف"};
         new AlertDialog.Builder(getContext())
             .setTitle("نشر متواصل")
-            .setSingleChoiceItems(choices, -1, (dialog, which) -> {
+            .setItems(choices, (dialog, which) -> {
                 dialog.dismiss();
                 if (which == choices.length - 1) {
                     stopExteraContinuous();
@@ -4773,7 +4773,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                 if (!ExteraFeatures.isRepeatPostingEnabled(currentAccount)) return;
                 SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(text, dialogId);
                 params.notify = true;
-                MessagesController.getInstance(currentAccount).getSendMessagesHelper().sendMessage(params);
+                SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
                 exteraRepeatHandler.postDelayed(this, periodMs);
             }
         };
@@ -4847,7 +4847,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                     });
                     sendPopupLayout.addView(actionScheduleButton, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, DEFAULT_HEIGHT));
                     actionContinuousButton = new ActionBarMenuSubItem(getContext(), true, false, resourcesProvider);
-                    actionContinuousButton.setTextAndIcon(ExteraFeatures.isRepeatPostingEnabled(currentAccount) ? "تعطيل النشر المتواصل" : "نشر متواصل", R.drawable.msg_schedule);
+                    actionContinuousButton.setTextAndIcon(ExteraFeatures.isRepeatPostingEnabled(currentAccount) ? "تعطيل النشر المتواصل" : "نشر متواصل", R.drawable.msg_calendar);
                     actionContinuousButton.setMinimumWidth(dp(196));
                     actionContinuousButton.setOnClickListener(v -> {
                         if (sendPopupWindow != null && sendPopupWindow.isShowing()) sendPopupWindow.dismiss();
