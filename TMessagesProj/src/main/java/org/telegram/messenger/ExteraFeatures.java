@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLRPC;
 
 /** Local-only Extera settings/state. */
 public final class ExteraFeatures {
