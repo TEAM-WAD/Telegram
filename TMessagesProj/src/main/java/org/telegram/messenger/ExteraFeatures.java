@@ -62,6 +62,10 @@ public final class ExteraFeatures {
     public static boolean isShowHiddenMembersEnabled(int account) { return prefs(account).getBoolean(KEY_SHOW_HIDDEN_MEMBERS, false); }
     public static void setShowHiddenMembersEnabled(int account, boolean enabled) { prefs(account).edit().putBoolean(KEY_SHOW_HIDDEN_MEMBERS, enabled).apply(); }
 
+    public static boolean shouldSuppressNotification(int account, long dialogId) {
+        return isMuteAllEnabled(account) || isDialogLocked(account, dialogId);
+    }
+
     public static boolean isDialogLocked(int account, long dialogId) {
         Set<String> values = prefs(account).getStringSet(KEY_LOCKED_DIALOGS, null);
         return values != null && values.contains(String.valueOf(dialogId));
@@ -196,9 +200,4 @@ public final class ExteraFeatures {
         message.destroyTime = 0;
         message.destroyTimeMillis = 0;
     }
-    /** Returns whether local Extera rules suppress notifications for a dialog. */
-    public static boolean shouldSuppressNotification(int account, long dialogId) {
-        return isMuteAllEnabled(account) || isDialogLocked(account, dialogId);
-    }
-
 }
