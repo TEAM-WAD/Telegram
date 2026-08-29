@@ -38,6 +38,26 @@ jobs:
             'build-tools;30.0.3' \
             'ndk;21.4.7075529'
 
+      - name: Remove duplicate NotificationsController source copies
+        shell: bash
+        run: |
+          set -e
+          while IFS= read -r -d '' file; do
+            case "$file" in
+              */NotificationsController\ \(1\).java|*/NotificationsController_1.java|*/NotificationsController-copy.java|*/NotificationsController_backup.java)
+                echo "Removing duplicate source: $file"
+                rm -f "$file"
+                ;;
+            esac
+          done < <(find . -type f \( -name 'NotificationsController (1).java' -o -name 'NotificationsController_1.java' -o -name 'NotificationsController-copy.java' -o -name 'NotificationsController_backup.java' \) -print0)
+          count="$(find TMessagesProj TMessagesProj_App -type f -name 'NotificationsController.java' 2>/dev/null | wc -l)"
+          echo "NotificationsController.java source count: $count"
+          test "$count" -eq 1 || {
+            echo "::error::Expected exactly one NotificationsController.java source, found $count."
+            find TMessagesProj TMessagesProj_App -type f -name 'NotificationsController.java' -print 2>/dev/null
+            exit 1
+          }
+
       - name: Verify Extera source files
         shell: bash
         run: |
