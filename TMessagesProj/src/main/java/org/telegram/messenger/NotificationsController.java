@@ -1071,7 +1071,7 @@ public class NotificationsController extends BaseController implements Notificat
 
             for (int a = 0; a < messageObjects.size(); a++) {
                 MessageObject messageObject = messageObjects.get(a);
-                if (messageObject != null && ExteraFeatures.shouldSuppressNotification(currentAccount, messageObject.getDialogId())) {
+                if (messageObject != null && (ExteraFeatures.isMuteAllEnabled(currentAccount) || ExteraFeatures.isDialogLocked(currentAccount, messageObject.getDialogId()))) {
                     continue;
                 }
                 if (messageObject.messageOwner != null && (messageObject.isImportedForward() ||
